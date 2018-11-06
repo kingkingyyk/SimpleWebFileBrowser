@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>{{ hostname }}'s Directory</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/css/materialize.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/js/materialize.min.js"></script>
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+</head>
+<body>
+    <nav style="padding:0px 15px;">
+        <div class="nav-wrapper">
+            <div class="col s12">
+                {% for route in routes %}
+                    <a href="?path={{route.path}}" class="breadcrumb">{{ route.name }}</a>
+                {% endfor %}
+            </div>
+        </div>
+    </nav>
+    <div class="container">
+        <div class="card-panel z-depth-2">
+            <table class="highlight">
+                <tr>
+                    <th>Folder/Files</th>
+                    <th>Last modified</th>
+                    <th>Size</th>
+                </tr>
+                {% for file in files %}
+                <tr>
+                    <td><i class="tiny material-icons">folder</i>     <a href="?path={{file.path}}">{{file.name}}</a></td>
+                    <td>{{file.time.strftime("%b %d %Y %I:%M%p")}}</td>
+                    <td>{{file.size}}</td>
+                </tr>
+                {% endfor %}
+            </table>
+        </div>
+    </div>
+    <p></p>
+</body>
+</html>

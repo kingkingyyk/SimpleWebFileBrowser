@@ -1,0 +1,4 @@
+gevent
+flask
+Jinja2
+humanize

@@ -1,0 +1,22 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>{{ hostname }}'s Directory</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/css/materialize.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/js/materialize.min.js"></script>
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+</head>
+<body>
+    <div class="container">
+        <h1>Whoops! We ran into error!</h1>
+        <table><tr><td>
+        <code>
+            {% autoescape false %}
+            {{error.replace('\n', '<br>')}}
+            {% endautoescape %}
+        </code>
+        </td></tr></table>
+    </div>
+</body>
+</html>
