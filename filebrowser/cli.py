@@ -18,7 +18,10 @@ class File(object):
             path = path[:-1]
         self.name = os.path.basename(path) if len(os.path.basename(path)) > 0 else path
         self.size = humanize.naturalsize(os.path.getsize(path)) if os.path.isfile(path) else '--'
-        self.time = datetime.fromtimestamp(os.path.getmtime(path))
+        try:
+            self.time = datetime.fromtimestamp(os.path.getmtime(path))
+        except:
+            self.time = datetime.fromtimestamp(0)
 
 
 @app.route('/', methods=['GET'])
