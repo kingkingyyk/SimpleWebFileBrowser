@@ -32,6 +32,8 @@ def index():
             route_list = [x for x in path.split(os.path.sep) if len(x.strip()) > 0]
             for i in range(1, len(route_list)):
                 route_list[i] = route_list[i-1] + os.path.sep + route_list[i]
+            if len(route_list) == 0:
+                route_list[0] = os.path.sep
             if route_list[0][-1] != os.path.sep:
                 route_list[0] += os.path.sep
 
