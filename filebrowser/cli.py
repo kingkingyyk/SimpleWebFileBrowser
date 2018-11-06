@@ -14,7 +14,7 @@ class File(object):
 
     def __init__(self, path):
         self.path = path
-        while path[-1] == os.path.sep:
+        while path[-1] == os.path.sep and len(path) > 1:
             path = path[:-1]
         self.name = os.path.basename(path) if len(os.path.basename(path)) > 0 else path
         self.size = humanize.naturalsize(os.path.getsize(path)) if os.path.isfile(path) else '--'
