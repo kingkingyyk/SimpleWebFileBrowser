@@ -2,3 +2,4 @@ gevent
 flask
 Jinja2
 humanize
+Flask-HTTPAuth

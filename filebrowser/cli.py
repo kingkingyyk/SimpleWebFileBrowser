@@ -1,13 +1,27 @@
 from gevent import monkey
 monkey.patch_all()
 
-import os, socket, humanize, sys, traceback
+import os, socket, humanize, sys, traceback, mimetypes
 from gevent.pywsgi import WSGIServer
-from flask import Flask, request, render_template, send_from_directory, abort
+from flask import Flask, request, render_template, send_from_directory
+from flask_httpauth import HTTPBasicAuth
 from pathlib import Path
 from datetime import datetime
 
+mimetypes.init()
+
+
+def get_extensions_for_type(type):
+    return [x for x in mimetypes.types_map if mimetypes.types_map[x].split('/')[0] == type]
+
+
+non_attachment = get_extensions_for_type('video') + \
+                 get_extensions_for_type('audio') + \
+                 get_extensions_for_type('image') + \
+                 ['.pdf', '.html', '.log', '.json', '.txt']
 app = Flask(__name__)
+auth = HTTPBasicAuth()
+login_dict = {'admin': 'admin'}
 
 
 class File(object):
@@ -24,7 +38,13 @@ class File(object):
             self.time = datetime.fromtimestamp(0)
 
 
+@auth.get_password
+def get_pw(username):
+    return login_dict.get(username, None)
+
+
 @app.route('/', methods=['GET'])
+@auth.login_required
 def index():
     path = request.args.get('path', str(Path.home()))
     try:
@@ -47,7 +67,7 @@ def index():
             filename = os.path.basename(path)
             return send_from_directory(os.path.abspath(os.path.join(path, os.pardir)),
                                        filename,
-                                       as_attachment=True,
+                                       as_attachment=len([x for x in non_attachment if filename.lower().endswith(x)]) == 0,
                                        conditional=True)
     except:
         return render_template('error.html',
@@ -56,8 +76,9 @@ def index():
 
 
 def main():
-    port = int(sys.argv[1]) if len(sys.argv) > 1 else 80
     server = WSGIServer(('0.0.0.0', port), app)
     server.serve_forever()
 
+port = int(sys.argv[1])
+login_dict = {sys.argv[2]: sys.argv[3]}
 main()
