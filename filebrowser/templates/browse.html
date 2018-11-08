@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <title>{{ hostname }}'s Directory</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/css/materialize.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/js/materialize.min.js"></script>
     <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
 </head>
@@ -27,7 +28,26 @@
                 </tr>
                 {% for file in files %}
                 <tr>
-                    <td><i class="tiny material-icons">folder</i>     <a href="?path={{file.path}}">{{file.name}}</a></td>
+                    <td>
+                        <i class="tiny material-icons">folder</i>&nbsp;
+                        {% if file.name.lower().endswith('.mp4') %}
+                            <a class="waves-effect waves-light modal-trigger" href="#video_window_{{file.name}}">{{file.name}}</a>&nbsp;
+                            <div id="video_window_{{file.name}}" class="modal">
+                                <div class="modal-content">
+                                    <h4 id="video_window_title">{{file.name}}</h4>
+                                    <video class="responsive-video" id="video_control_{{file.name}}" controls>
+                                        <source src="?path={{file.path}}" type="video/mp4">
+                                    </video>
+                                </div>
+                                <div class="modal-footer">
+                                    <a href="?path={{file.path}}&download=true" class="waves-effect waves-light btn">Download</a>&nbsp;
+                                    <a href="#!" class="modal-close waves-effect waves-green btn-flat" onclick="stopVideo('.responsive-video')">Close</a>
+                                </div>
+                           </div>
+                        {% else %}
+                            <a href="?path={{file.path}}">{{file.name}}</a>&nbsp;
+                        {% endif %}
+                    </td>
                     <td>{{file.time.strftime("%b %d %Y %I:%M%p")}}</td>
                     <td>{{file.size}}</td>
                 </tr>
@@ -35,6 +55,20 @@
             </table>
         </div>
     </div>
+
     <p></p>
+    <script>
+        $(document).ready(function() {
+            $(".modal").modal();
+            $(".modal").on("hide", function() {
+                console.log("browser page has been hidden");
+            });
+        });
+
+
+        function stopVideo(id) {
+            $(id).trigger('pause');
+        }
+    </script>
 </body>
 </html>
