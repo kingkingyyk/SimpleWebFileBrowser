@@ -29,24 +29,20 @@
                 {% for file in files %}
                 <tr>
                     <td>
-                        <i class="tiny material-icons">folder</i>&nbsp;
-                        {% if file.name.lower().endswith('.mp4') %}
-                            <a class="waves-effect waves-light modal-trigger" href="#video_window_{{file.name}}">{{file.name}}</a>&nbsp;
-                            <div id="video_window_{{file.name}}" class="modal">
-                                <div class="modal-content">
-                                    <h4 id="video_window_title">{{file.name}}</h4>
-                                    <video class="responsive-video" id="video_control_{{file.name}}" controls>
-                                        <source src="?path={{file.path}}" type="video/mp4">
-                                    </video>
-                                </div>
-                                <div class="modal-footer">
-                                    <a href="?path={{file.path}}&download=true" class="waves-effect waves-light btn">Download</a>&nbsp;
-                                    <a href="#!" class="modal-close waves-effect waves-green btn-flat" onclick="stopVideo('.responsive-video')">Close</a>
-                                </div>
-                           </div>
+                        {% if file.is_file and file.playable %}
+                            <i class="tiny material-icons">perm_media</i>
+                        {% elif file.is_file and not file.playable %}
+                            <i class="tiny material-icons">insert_drive_file</i>
                         {% else %}
-                            <a href="?path={{file.path}}">{{file.name}}</a>&nbsp;
+                            <i class="tiny material-icons">folder</i>
                         {% endif %}
+                        &nbsp;
+                        {% if file.playable %}
+                            <a class="waves-effect waves-light modal-trigger" href="#video_window" onclick="showVideo('{{file.name}}', '?path={{file.path.replace('\\','\\\\')}}', '{{file.playable_tag}}')">{{file.name}}</a>
+                        {% else %}
+                            <a href="?path={{file.path}}">{{file.name}}</a>
+                        {% endif %}
+                        &nbsp;
                     </td>
                     <td>{{file.time.strftime("%b %d %Y %I:%M%p")}}</td>
                     <td>{{file.size}}</td>
@@ -55,19 +51,38 @@
             </table>
         </div>
     </div>
-
+    <div id="video_window" class="modal modal-fixed-footer">
+        <div class="modal-content">
+            <h4 id="video_window_title"></h4>
+            <video class="responsive-video" id="video_control" controls preload="metadata">
+                <source>
+            </video>
+        </div>
+        <div class="modal-footer">
+            <a id="download" class="waves-effect waves-light btn">Download</a>&nbsp;
+            <a href="#!" class="modal-close waves-effect waves-green btn-flat">Close</a>
+        </div>
+   </div>
     <p></p>
     <script>
         $(document).ready(function() {
-            $(".modal").modal();
-            $(".modal").on("hide", function() {
-                console.log("browser page has been hidden");
-            });
+            var stopVideoOnClose = function() {
+                $('#video_window video')[0].pause();
+            };
+            $(".modal").modal({onCloseStart:stopVideoOnClose, height: "auto", maxHeight: "90%"});
         });
 
-
-        function stopVideo(id) {
-            $(id).trigger('pause');
+        lastFileName = ''
+        function showVideo(fileName, mediaURL, mediaType) {
+            if (fileName != lastFileName) {
+                $(video_window_title).text(fileName);
+                $('#video_window video source').attr('src', mediaURL);
+                $('#video_window video source').attr('type', mediaType);
+                $('#video_window video')[0].load();
+                $('#download').attr('href', mediaURL+'&download=true');
+                lastFileName = fileName;
+            }
+            $('#video_window video')[0].play();
         }
     </script>
 </body>

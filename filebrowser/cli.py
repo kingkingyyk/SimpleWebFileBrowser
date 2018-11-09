@@ -20,6 +20,11 @@ non_attachment = get_extensions_for_type('video') + \
                  get_extensions_for_type('image') + \
                  ['.pdf', '.html', '.log', '.json', '.txt']
 
+html_media = {'.mp4': 'video/mp4', '.mkv': 'video/mp4',
+              '.webm': 'video/webm', '.ogg': 'video/ogg',
+              '.mp3': 'audio/mpeg', '.wav': 'audio/wav',
+              'm4a': 'audio/mp4'}
+
 app = Flask(__name__)
 auth = HTTPBasicAuth()
 login_dict = {'admin': 'admin'}
@@ -30,11 +35,15 @@ class File(object):
     def __init__(self, path):
         self.path = path
         self.name = os.path.basename(path) if len(os.path.basename(path)) > 0 else path
-        self.size = humanize.naturalsize(os.path.getsize(path)) if os.path.isfile(path) else '--'
+        self.is_file = os.path.isfile(path)
+        self.size = humanize.naturalsize(os.path.getsize(path)) if self.is_file else '--'
         try:
             self.time = datetime.fromtimestamp(os.path.getmtime(path))
         except:
             self.time = datetime.fromtimestamp(0)
+        ext = [x for x in html_media.keys() if self.path.endswith(x)]
+        self.playable = os.path.isfile(path) and len(ext) > 0
+        self.playable_tag = html_media[ext[0]] if self.playable else None
 
 
 @auth.get_password
