@@ -1,0 +1,31 @@
+{% extends 'base.html' %}
+
+{% block content %}
+    <tr>
+        <th>Folder/Files</th>
+        <th>Last modified</th>
+        <th>Size</th>
+    </tr>
+    {% for file in files %}
+    <tr>
+        <td>
+            {% if file.is_file and file.playable %}
+                <i class="tiny material-icons">perm_media</i>
+            {% elif file.is_file and not file.playable %}
+                <i class="tiny material-icons">insert_drive_file</i>
+            {% else %}
+                <i class="tiny material-icons">folder</i>
+            {% endif %}
+            &nbsp;
+            {% if file.playable %}
+                <a class="waves-effect waves-light modal-trigger" href="#video_window" onclick="showVideo('{{file.name}}', '?path={{file.path.replace('\\','\\\\')}}', '{{file.playable_tag}}')">{{file.name}}</a>
+            {% else %}
+                <a href="?path={{file.path}}">{{file.name}}</a>
+            {% endif %}
+            &nbsp;
+        </td>
+        <td>{{file.time.strftime("%b %d %Y %I:%M%p")}}</td>
+        <td>{{file.size}}</td>
+    </tr>
+    {% endfor %}
+{% endblock %}

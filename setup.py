@@ -17,7 +17,7 @@ setup(
     long_description=read('README.md'),
     classifiers=['Development Status :: Release',
                  'Topic :: Utilities'],
-    package_data={'' : ['templates/*.html']},
+    package_data={'': ['*', '*/*', '*/*/*']},
     include_package_data=True,
     entry_points={
         'console_scripts': ['SimpleWebFileBrowser=filebrowser.cli:main'],

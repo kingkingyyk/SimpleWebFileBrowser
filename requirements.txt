@@ -3,3 +3,4 @@ flask
 Jinja2
 humanize
 Flask-HTTPAuth
+Flask-Mobility

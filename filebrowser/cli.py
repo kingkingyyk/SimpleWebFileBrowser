@@ -1,12 +1,13 @@
 from gevent import monkey
 monkey.patch_all()
 
-import os, socket, humanize, sys, traceback, mimetypes, platform, string
+import os, socket, humanize, sys, traceback, mimetypes, platform, string, time, operator
 from gevent.pywsgi import WSGIServer
-from flask import Flask, request, render_template, send_from_directory
+from flask import Flask, request, render_template, send_from_directory, g
 from flask_httpauth import HTTPBasicAuth
 from pathlib import Path
 from datetime import datetime
+from flask_mobility import Mobility
 
 mimetypes.init()
 
@@ -26,6 +27,7 @@ html_media = {'.mp4': 'video/mp4', '.mkv': 'video/mp4',
               'm4a': 'audio/mp4'}
 
 app = Flask(__name__)
+Mobility(app)
 auth = HTTPBasicAuth()
 login_dict = {'admin': 'admin'}
 
@@ -51,12 +53,19 @@ def get_pw(username):
     return login_dict.get(username, None)
 
 
+@app.before_request
+def before_request():
+    g.request_start_time = time.time()
+    g.request_time = lambda: '%d' % int((time.time() - g.request_start_time)*1000)
+
+
 @app.route('/', methods=['GET'])
 @auth.login_required
 def index():
     path = request.args.get('path', '')
     force_attachment = request.args.get('download', 'false') == 'true'
     try:
+        template = {True: 'mobile/index.html', False: 'index.html'}
         if path == '':
             root_drives = []
             if platform.system() == 'Windows':
@@ -66,24 +75,26 @@ def index():
                     if bitmask & 1:
                         root_drives.append(letter)
                     bitmask >>= 1
-                root_drives = [x + ':' for x in root_drives]
+                root_drives = [x + ':\\' for x in root_drives]
             elif platform.system() == 'Linux':
                 root_drives = ['/' + x for x in os.listdir('/')]
-            return render_template('browse.html',
+            return render_template(template[request.MOBILE],
                                    hostname=socket.gethostname(),
                                    path='',
-                                   files=[File(x) for x in root_drives])
+                                   files=sorted([File(x) for x in root_drives], key=lambda obj: (obj.is_file, obj.name)),
+                                   footer_text='Page generated in '+g.request_time()+'ms.')
         elif os.path.isdir(path):
             route_list = list(Path(path).parts)
             if not route_list[0].endswith(os.path.sep):
                 route_list[0] += os.path.sep
             for i in range(1, len(route_list)):
                 route_list[i] = os.path.join(route_list[i-1], route_list[i])
-            return render_template('browse.html',
+            return render_template(template[request.MOBILE],
                                    hostname=socket.gethostname(),
                                    path=path,
                                    routes=[File(x) for x in route_list],
-                                   files=[File(os.path.join(path, x)) for x in os.listdir(path)])
+                                   files=sorted([File(os.path.join(path, x)) for x in os.listdir(path)], key=lambda obj: (obj.is_file, obj.name)),
+                                   footer_text='Page generated in '+g.request_time()+'ms.')
         else:
             filename = os.path.basename(path)
             return send_from_directory(os.path.abspath(os.path.join(path, os.pardir)),
@@ -97,6 +108,7 @@ def index():
 
 
 def main():
+    app.jinja_env.cache = {}
     server = WSGIServer(('0.0.0.0', port), app)
     server.serve_forever()
 
