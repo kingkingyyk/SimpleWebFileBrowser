@@ -20,15 +20,8 @@
     </style>
 </head>
 <main>
-    <nav style="padding:0px 15px;">
-        <div class="nav-wrapper">
-            <div class="col s12">
-                {% for route in routes %}
-                    <a href="?path={{route.path}}" class="breadcrumb">{{ route.name }}</a>
-                {% endfor %}
-            </div>
-        </div>
-    </nav>
+    {% block navbar %}
+    {% endblock %}
     <div class="container">
         <div class="card-panel z-depth-2">
             <table class="highlight">
@@ -57,6 +50,9 @@
             $(".modal").modal({onCloseStart:stopVideoOnClose});
             $(".modal").attr('maxHeight', '100%')
             $(".modal").attr('overflow', 'visible')
+
+            {% block extraInitScripts %}
+            {% endblock %}
         });
 
         lastFileName = ''

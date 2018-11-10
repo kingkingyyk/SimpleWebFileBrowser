@@ -1,5 +1,16 @@
 {% extends 'base.html' %}
 
+{% block navbar %}
+    <nav style="height: auto; padding: 16px"><a href="#" data-target="slide-out" class="sidenav-trigger"><i class="large material-icons" style="font-size: 64px">menu</i></a><div style="font-size: 64px">{{path}}</div></nav>
+    <ul id="slide-out" class="sidenav">
+        <li><a class="subheader" style="font-size: 24px; height: 64px; vertical-align:middle"><p>Navigate to</p></a></li>
+        <li><div class="divider"></div></li>
+        {% for route in routes %}
+        <li><a class="waves-effect"  style="font-size: 24px; height: 96px; vertical-align:middle" href="?path={{route.path}}"><p>{{ route.name }}</p></a></li>
+        {% endfor %}
+    </ul>
+{% endblock %}
+
 {% block content %}
     {% for file in files %}
             <tr>
@@ -29,4 +40,8 @@
                 </td>
             </tr>
     {% endfor %}
+{% endblock %}
+
+{% block extraInitScripts %}
+    $('.sidenav').sidenav();
 {% endblock %}

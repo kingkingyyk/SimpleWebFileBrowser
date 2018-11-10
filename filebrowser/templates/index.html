@@ -1,5 +1,17 @@
 {% extends 'base.html' %}
 
+{% block navbar %}
+    <nav style="padding:0px 15px;">
+        <div class="nav-wrapper">
+            <div class="col s12">
+                {% for route in routes %}
+                    <a href="?path={{route.path}}" class="breadcrumb">{{ route.name }}</a>
+                {% endfor %}
+            </div>
+        </div>
+    </nav>
+{% endblock %}
+
 {% block content %}
     <tr>
         <th>Folder/Files</th>
